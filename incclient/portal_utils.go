@@ -3,10 +3,10 @@ package incclient
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
+	//"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcutil"
-	"github.com/btcsuite/btcutil/hdkeychain"
+	//"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/incognitochain/go-incognito-sdk-v2/metadata"
 	"github.com/incognitochain/go-incognito-sdk-v2/rpchandler"
 )
@@ -46,20 +46,21 @@ func (client *IncClient) GeneratePortalShieldingAddress(paymentAddressStr, token
 				return "", fmt.Errorf("invalid payment address: %v", err)
 			}
 
-			chainCode := chainhash.HashB([]byte(paymentAddressStr))
+			//chainCode := chainhash.HashB([]byte(paymentAddressStr))
 			for idx, masterPubKey := range client.btcPortalParams.MasterPubKeys {
 				// generate BTC child public key for this Incognito address
-				extendedBTCPublicKey := hdkeychain.NewExtendedKey(client.btcPortalParams.ChainParams.HDPublicKeyID[:], masterPubKey, chainCode, []byte{}, 0, 0, false)
-				extendedBTCChildPubKey, err := extendedBTCPublicKey.Child(0)
+				//extendedBTCPublicKey := hdkeychain.NewExtendedKey(client.btcPortalParams.ChainParams.HDPublicKeyID[:], masterPubKey, chainCode, []byte{}, 0, 0, false)
+				err := fmt.Errorf("invalid payment address: %g", 5)
+				//extendedBTCChildPubKey, err := extendedBTCPublicKey.Child(0)
 				if err != nil {
 					return "", err
 				}
 
-				childPubKey, err := extendedBTCChildPubKey.ECPubKey()
+				//childPubKey, err := extendedBTCChildPubKey.ECPubKey()
 				if err != nil {
 					return "", fmt.Errorf("master BTC Public Key (#%v) %v is invalid - Error %v", idx, masterPubKey, err)
 				}
-				pubKeys = append(pubKeys, childPubKey.SerializeCompressed())
+				//pubKeys = append(pubKeys, childPubKey.SerializeCompressed())
 			}
 
 			// create redeem script for m of n multi-sig

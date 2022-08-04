@@ -232,6 +232,7 @@ func (tx *Tx) Init(txParams interface{}) error {
 	}
 
 	txSize := tx.GetTxActualSize()
+	fmt.Printf("TX_SIZE = %d\n", txSize)
 	if txSize > common.MaxTxSize {
 		return utils.NewTransactionErr(utils.ExceedSizeTx, nil, strconv.Itoa(int(txSize)))
 	}

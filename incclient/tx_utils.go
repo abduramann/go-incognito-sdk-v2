@@ -119,6 +119,15 @@ func (cp *coinParams) SetBytes(data []byte) error {
 	return nil
 }
 
+
+func CrCoinParams(xcoinList []coin.PlainCoin, xidxList  []uint64) coinParams {
+        return coinParams{
+                coinList: xcoinList,
+                idxList: xidxList,
+        }
+}
+
+
 // createPaymentInfos creates a list of key.PaymentInfo based on the provided address list and corresponding amount list.
 func createPaymentInfos(addrList []string, amountList []uint64) ([]*key.PaymentInfo, error) {
 	if len(addrList) != len(amountList) {
