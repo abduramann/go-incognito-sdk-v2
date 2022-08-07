@@ -14,5 +14,3 @@ require (
 	github.com/wemeetagain/go-hdwallet v0.1.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 )
-
-replace github.com/incognitochain/go-incognito-sdk-v2 => github.com/abduramann/go-incognito-sdk-v2 master
