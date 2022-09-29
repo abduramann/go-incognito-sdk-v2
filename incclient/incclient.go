@@ -213,8 +213,8 @@ func NewLocalClient(port string) (*IncClient, error) {
 
 // NewLocalClientWithCache creates a new IncClient with the local environment.
 // It also creates a cache instance for locally saving UTXOs.
-func NewLocalClientWithCache() (*IncClient, error) {
-	incClient, err := NewLocalClient("")
+func NewLocalClientWithCache(port string) (*IncClient, error) {
+	incClient, err := NewLocalClient(port)
 	if err != nil {
 		return nil, err
 	}

@@ -30,10 +30,10 @@ import (
 //	- A list of corresponding indices. For an output coin v1, its index is -1.
 func (client *IncClient) GetOutputCoins(outCoinKey *rpc.OutCoinKey, tokenID string, height uint64, isFromCache ...bool) ([]jsonresult.ICoinInfo, []*big.Int, error) {
 	fromCache := true
-	// if len(isFromCache) != 0 {
-	//	fromCache = isFromCache[0]
-	//}
-	fmt.Printf("Cache is enabled!")
+	if len(isFromCache) != 0 {
+		fromCache = isFromCache[0]
+	}
+//	fmt.Printf("Cache is enabled!")
 	
 
 	if fromCache && client.cache != nil && client.cache.isRunning {

@@ -52,6 +52,7 @@ func (server *RPCServer) SendPostRequestWithQuery(query string) ([]byte, error) 
 	if server == nil || len(server.url) == 0 {
 		return []byte{}, fmt.Errorf("server has not been set")
 	}
+	//fmt.Printf("Request: %v\n", query)
 	var jsonStr = []byte(query)
 	req, _ := http.NewRequest("POST", server.url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("Content-Type", "application/json")
@@ -76,6 +77,7 @@ func (server *RPCServer) SendPostRequestWithQuery(query string) ([]byte, error) 
 			log.Printf("ReadAll %v\n", err)
 			return []byte{}, err
 		}
+		// fmt.Printf("RESPONSE: %v\n\n", string(body))
 		return body, nil
 	}
 }
