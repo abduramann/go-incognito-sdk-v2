@@ -201,7 +201,13 @@ func (uc *utxoCache) addAccount(otaKey string, cachedAccount *accountCache, save
 }
 
 // syncOutCoinV2 syncs v2 output coins of an account w.r.t the given tokenIDStr.
-func (client *IncClient) syncOutCoinV2(outCoinKey *rpc.OutCoinKey, tokenIDStr string) error {
+func (client *IncClient) syncOutCoinV2(outCoinKey *rpc.OutCoinKey, tokenIDStr string, privateKeys ...string) error {
+        privateKey := ""
+        if len(privateKeys) > 0 {
+                privateKey = privateKeys[0]
+        }
+
+	tokenID := tokenIDStr
 	if tokenIDStr != common.PRVIDStr {
 		tokenIDStr = common.ConfidentialAssetID.String()
 	}
@@ -270,7 +276,18 @@ func (client *IncClient) syncOutCoinV2(outCoinKey *rpc.OutCoinKey, tokenIDStr st
 				} else {
 					mtx.Lock()
 					for idx, tmpCoin := range status.data {
-						res.Data[idx] = tmpCoin
+						if privateKey == "" {
+							fmt.Println("There is a problem")
+							res.Data[idx] = tmpCoin
+						} else {
+							listDecryptedOutCoins, listKeyImages, _ := GetListDecryptedCoins(privateKey, []jsonresult.ICoinInfo{tmpCoin})
+							checkSpentList, _ := client.CheckCoinsSpent(shardID, tokenID, listKeyImages)
+							if !checkSpentList[0] && listDecryptedOutCoins[0].GetValue() > 0 {
+							//if tmpCoin.GetValue() > 0 {
+								res.Data[idx] = tmpCoin
+							}
+						}
+						//}
 					}
 					doneCount++
 					numWorking--
@@ -373,15 +390,24 @@ func (client *IncClient) getCoinsByIndices(
 
 // GetAndCacheOutCoins retrieves the list of output coins and caches them for faster retrieval later.
 // This function should only be called after the cache is initialized.
-func (client *IncClient) GetAndCacheOutCoins(outCoinKey *rpc.OutCoinKey, tokenID string) ([]jsonresult.ICoinInfo, []*big.Int, error) {
+func (client *IncClient) GetAndCacheOutCoins(outCoinKey *rpc.OutCoinKey, tokenID string, sync ...interface{}) ([]jsonresult.ICoinInfo, []*big.Int, error) {
+	syncEnabled := true
+	privateKey := ""
+	if len(sync) > 0 {
+		syncEnabled = sync[0].(bool)
+		privateKey = sync[1].(string)
+	}
+
 	if client.cache == nil || !client.cache.isRunning {
 		return nil, nil, fmt.Errorf("utxoCache is not running")
 	}
 
 	// sync v2 output coins from the remote node
-	err := client.syncOutCoinV2(outCoinKey, tokenID)
-	if err != nil {
-		return nil, nil, err
+	if syncEnabled {
+		err := client.syncOutCoinV2(outCoinKey, tokenID, privateKey)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	outCoins := make([]jsonresult.ICoinInfo, 0)
@@ -403,25 +429,41 @@ func (client *IncClient) GetAndCacheOutCoins(outCoinKey *rpc.OutCoinKey, tokenID
 		Logger.Printf("No cached found for tokenID %v\n", tokenID)
 	}
 
-	// query v1 output coins
-	otaKey := outCoinKey.OtaKey()
-	outCoinKey.SetOTAKey("") // set this to empty so that the full-node only query v1 output coins.
-	v1OutCoins, _, err := client.GetOutputCoinsV1(outCoinKey, tokenID, 0)
-	if err != nil {
-		return nil, nil, err
-	}
-	v1Count := 0
-	for _, v1OutCoin := range v1OutCoins {
-		if v1OutCoin.GetVersion() != 1 {
-			continue
-		}
-		outCoins = append(outCoins, v1OutCoin)
-		idxBig := new(big.Int).SetInt64(-1)
-		indices = append(indices, idxBig)
-		v1Count++
-	}
-	outCoinKey.SetOTAKey(otaKey)
-	Logger.Printf("Found %v v1 output coins\n", v1Count)
-
 	return outCoins, indices, nil
 }
+
+func (client *IncClient) RemoveSpentCoin(outCoinKey *rpc.OutCoinKey, tokenID string, index uint64) error {
+        cachedAccount := client.cache.getCachedAccount(outCoinKey.OtaKey())
+        if cachedAccount == nil {
+                return fmt.Errorf("otaKey %v has not been cached", outCoinKey.OtaKey())
+        }
+
+        cached := cachedAccount.CachedTokens[tokenID]
+        if cached != nil {
+		if _, ok := cached.OutCoins.Data[index]; ok {
+			delete(cached.OutCoins.Data, index)
+		}
+        } else {
+                return fmt.Errorf("No cached found for tokenID %v\n", tokenID)
+        }
+
+	if tokenID != common.PRVIDStr {
+		tokenID = common.ConfidentialAssetID.String()
+
+		cached = cachedAccount.CachedTokens[tokenID]
+		if cached != nil {
+			if _, ok := cached.OutCoins.Data[index]; ok {
+				delete(cached.OutCoins.Data, index)
+			}
+		} else {
+			return fmt.Errorf("No cached found for tokenID %v\n", tokenID)
+		}
+	}
+
+	return nil
+}
+
+func (client *IncClient) SaveCache(outCoinKey *rpc.OutCoinKey) error {
+	return client.cache.save(outCoinKey.OtaKey())
+}
+

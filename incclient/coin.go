@@ -28,16 +28,19 @@ import (
 // The returned result consists of
 //	- A list of output coins
 //	- A list of corresponding indices. For an output coin v1, its index is -1.
-func (client *IncClient) GetOutputCoins(outCoinKey *rpc.OutCoinKey, tokenID string, height uint64, isFromCache ...bool) ([]jsonresult.ICoinInfo, []*big.Int, error) {
-	fromCache := true
-	if len(isFromCache) != 0 {
-		fromCache = isFromCache[0]
-	}
-//	fmt.Printf("Cache is enabled!")
-	
+func (client *IncClient) GetOutputCoins(outCoinKey *rpc.OutCoinKey, tokenID string, height uint64, isFromCache ...interface{}) ([]jsonresult.ICoinInfo, []*big.Int, error) {
+        fromCache := true
+        privateKey := ""
+        if len(isFromCache) > 0 {
+                fromCache = isFromCache[0].(bool)
+                privateKey = isFromCache[1].(string)
+        }
+
+	//	fmt.Printf("Cache is enabled!")
+
 
 	if fromCache && client.cache != nil && client.cache.isRunning {
-		return client.GetAndCacheOutCoins(outCoinKey, tokenID)
+		return client.GetAndCacheOutCoins(outCoinKey, tokenID, true, privateKey)
 	}
 
 	if client.version == 1 {
@@ -141,7 +144,7 @@ func (client *IncClient) GetUnspentOutputCoins(privateKey, tokenID string, heigh
 	}
 	outCoinKey.SetReadonlyKey("") // call this if you do not want the remote full-node to decrypt your coin
 
-	listOutputCoins, listIndices, err := client.GetOutputCoins(outCoinKey, tokenID, height)
+	listOutputCoins, listIndices, err := client.GetOutputCoins(outCoinKey, tokenID, height, true, privateKey)
 	if err != nil {
 		return nil, nil, err
 	}
