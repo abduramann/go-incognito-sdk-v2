@@ -8,7 +8,7 @@ const (
 	MainNetFTMContractAddressStr      = "0x43D037A562099A4C2c95b1E2120cc43054450629"
 	MainNetPRVERC20ContractAddressStr = "0xB64fde8f199F073F41c132B9eC7aD5b61De0B1B7"
 	MainNetPRVBEP20ContractAddressStr = "0xB64fde8f199F073F41c132B9eC7aD5b61De0B1B7"
-	MainNetFullNode                   = "https://beta-fullnode.incognito.org/fullnode"
+	MainNetFullNode                   = "https://lb-fullnode.incognito.org/fullnode"
 	MainNetETHHost                    = "https://mainnet.infura.io/v3/34918000975d4374a056ed78fe21c517"
 	MainNetBSCHost                    = "https://bsc-dataseed.binance.org"
 	MainNetPLGHost                    = "https://matic-mainnet.chainstacklabs.com"
@@ -57,7 +57,8 @@ const (
 )
 
 const (
-	DefaultPRVFee            = uint64(100)
+	//DefaultPRVFee            = uint64(100)
+	DefaultPRVFee            = uint64(100000000) // 0.1 PRV
 	defaultNftRequiredAmount = 100
 	MaxInputSize             = 30
 	MaxOutputSize            = 30
