@@ -57,10 +57,7 @@ const (
 )
 
 const (
-<<<<<<< HEAD
 	//DefaultPRVFee            = uint64(100)
-=======
->>>>>>> 54005796c528b76a1160e3743e0aa3c380a31f2e
 	DefaultPRVFee            = uint64(100000000) // 0.1 PRV
 	defaultNftRequiredAmount = 100
 	MaxInputSize             = 30
