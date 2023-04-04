@@ -261,6 +261,22 @@ func (client *IncClient) GetBurnProof(txHash string, evmNetworkID ...int) (*json
 	return &tmp, nil
 }
 
+
+func (client *IncClient) GetUnifiedBurnProof(txHash string) (*jsonresult.InstructionProof, error) {
+        responseInBytes, err := client.rpcServer.GetUnifiedBurnProof(txHash)
+        if err != nil {
+                return nil, err
+        }
+
+        var tmp jsonresult.InstructionProof
+        err = rpchandler.ParseResponse(responseInBytes, &tmp)
+        if err != nil {
+                return nil, err
+        }
+
+        return &tmp, nil
+}
+
 // GetBridgeTokens returns all bridge tokens in the network.
 func (client *IncClient) GetBridgeTokens() ([]*BridgeTokenInfo, error) {
 	responseInBytes, err := client.rpcServer.GetAllBridgeTokens()

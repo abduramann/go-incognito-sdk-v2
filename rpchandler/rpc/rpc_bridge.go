@@ -62,6 +62,17 @@ func (server *RPCServer) GetBurnProof(txHash string, evmNetworkID ...int) ([]byt
 	return server.SendQuery(method, params)
 }
 
+func (server *RPCServer) GetUnifiedBurnProof(txHash string) ([]byte, error) {
+        tmpParams := make(map[string]interface{})
+        tmpParams["TxReqID"] = txHash
+	tmpParams["DataIndex"] = 0
+
+	method := "bridgeaggGetBurnProof"
+        params := make([]interface{}, 0)
+        params = append(params, tmpParams)
+        return server.SendQuery(method, params)
+}
+
 // GetBurnProofForSC retrieves the burning proof of a transaction for depositing to smart contracts.
 func (server *RPCServer) GetBurnProofForSC(txHash string) ([]byte, error) {
 	params := make([]interface{}, 0)
